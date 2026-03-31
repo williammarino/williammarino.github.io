@@ -87,7 +87,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 120px 48px 80px;
+    padding: 120px 48px 48px;
     position: relative;
     overflow: hidden;
   }
@@ -206,6 +206,19 @@
   .btn-ghost:hover {
     border-color: var(--accent);
     color: var(--accent);
+  }
+
+  .hero-conviction {
+    margin-top: 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+    font-style: italic;
+    font-weight: 700;
+    color: var(--text);
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+    max-width: 600px;
+    line-height: 1.3;
   }
 
   /* STATS TICKER */
@@ -996,8 +1009,8 @@
   </p>
   <div class="hero-cta">
     <a href="#platforms" class="btn-primary">View My Work</a>
-
   </div>
+  <div class="hero-conviction fade-in">"Technology should scale the business, not just support it."</div>
 </div>
 
 <!-- STATS BAR -->
@@ -1207,7 +1220,7 @@
 
     <div class="platform-card fade-in">
       <span class="platform-icon">🔄</span>
-      <div class="platform-tag">Platform Architecture</div>
+      <div class="platform-tag">Data Architecture · Migration Strategy</div>
       <div class="platform-name">Snowflake → GCP BigQuery Migration</div>
       <p class="platform-desc">Built the enterprise data lake from scratch on Snowflake, scaled it to 10PB+, earned a featured Snowflake customer case study — then made the architectural call to migrate fully to GCP BigQuery as the production intelligence layer. A story about judgment and conviction, not just execution.</p>
       <div class="platform-metric">▸ 10PB+ migrated · Featured Snowflake case study · Zero-downtime transition</div>
@@ -1222,7 +1235,7 @@
 
     <div class="platform-card fade-in">
       <span class="platform-icon">⚡</span>
-      <div class="platform-tag">Data Infrastructure</div>
+      <div class="platform-tag">Data Platform Leadership</div>
       <div class="platform-name">Real-Time Streaming Pipeline</div>
       <p class="platform-desc">Built and operated enterprise-scale streaming infrastructure — high-volume Kafka and Pub/Sub pipelines, event-driven architectures, and real-time ELT transformation layers delivering mission-critical telemetry and network analytics across 300+ global venues with production-grade reliability and pipeline SLAs.</p>
       <div class="platform-metric">▸ 300+ venues · Mission-critical telemetry · Production-grade SLAs</div>
@@ -1330,8 +1343,8 @@
     </div>
     <div class="leadership-card fade-in">
       <div class="leadership-icon">◇</div>
-      <div class="leadership-title">Strategic Partnerships</div>
-      <p class="leadership-desc">Forged partnerships with AWS, GCP, Snowflake, and industry alliances to secure early access to emerging AI capabilities and keep the platform roadmap ahead of the market.</p>
+      <div class="leadership-title">Data Strategy & Platform Vision</div>
+      <p class="leadership-desc">Built enterprise data foundations from scratch — architecture, governance, and platform decisions that powered every AI system on top of them. Snowflake to BigQuery, batch to real-time streaming, raw telemetry to decision intelligence.</p>
     </div>
   </div>
 </section>
@@ -1498,9 +1511,6 @@
 
       <p>A <strong>practitioner-executive who leads from the front</strong> — embedding with finance, HR, network ops, and sales to deploy AI that eliminated real work. Trusted C-suite and Board partner for AI strategy and investment. Led a team of 50+. Owned a $28M budget. Wharton Executive CTO Program, 2024. AWS re:Invent speaker. WBA AI co-author.</p>
 
-      <div class="about-conviction">
-        "Technology should scale the business, not just support it."
-      </div>
     </div>
   </div>
 </section>
