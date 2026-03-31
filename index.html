@@ -618,27 +618,158 @@
     background: var(--surface);
     border-top: 1px solid var(--border);
     padding: 80px 48px;
+  }
+
+  .contact-inner {
+    max-width: 700px;
+    margin: 0 auto;
     text-align: center;
+  }
+
+  .contact-exploring {
+    margin-bottom: 40px;
+  }
+
+  .contact-exploring-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+
+  .contact-exploring-roles {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .contact-exploring-tags {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .explore-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    padding: 0 8px;
+    border-right: 1px solid var(--border);
+  }
+
+  .explore-tag:last-child { border-right: none; }
+
+  .contact-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 40px 0;
+  }
+
+  .contact-get-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
   }
 
   .contact-title {
     font-family: 'Playfair Display', serif;
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 900;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   .contact-sub {
     color: var(--muted);
-    font-size: 1rem;
-    margin-bottom: 40px;
+    font-size: 0.95rem;
+    margin-bottom: 36px;
   }
 
-  .contact-links {
+  /* FORM */
+  .contact-form {
     display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .form-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--muted); }
+
+  .form-textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .form-textarea:focus { border-color: var(--accent); }
+  .form-textarea::placeholder { color: var(--muted); }
+
+  .form-submit {
+    background: var(--accent);
+    color: #080b0f;
+    border: none;
+    padding: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    width: 100%;
+  }
+
+  .form-submit:hover {
+    background: #f0b060;
+    transform: translateY(-1px);
+  }
+
+  .form-success {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-align: center;
+    padding: 12px;
+    border: 1px solid rgba(232,160,69,0.3);
+    background: rgba(232,160,69,0.05);
   }
 
   /* FOOTER */
@@ -649,6 +780,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   .footer-copy {
@@ -671,6 +804,28 @@
   }
 
   .footer-links a:hover { color: var(--accent); }
+
+  .footer-resumes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-resume-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-resume-link:hover { color: var(--accent); }
+
+  .footer-resume-sep {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--dim);
+  }
 
   /* ANIMATIONS */
   @keyframes fadeUp {
@@ -699,6 +854,8 @@
     .about-left { position: static; }
     footer { flex-direction: column; gap: 12px; text-align: center; }
     .contact-section { padding: 60px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+    .footer-resumes { justify-content: center; }
   }
 </style>
 </head>
@@ -1189,13 +1346,40 @@
 </div>
 
 <!-- CONTACT -->
+<!-- CONTACT FORM -->
 <div class="contact-section">
-  <h2 class="contact-title fade-in">Let's Talk</h2>
-  <p class="contact-sub fade-in">Open to VP of AI, Enterprise Automation, and Data leadership roles.</p>
-  <div class="contact-links fade-in">
-    <a href="/cdn-cgi/l/email-protection#ceb9a7a2a2a7afa3e0bce0a3afbca7a0a18ea9a3afa7a2e0ada1a3" class="btn-primary"><span class="__cf_email__" data-cfemail="2156484d4d48404c0f530f4c4053484f4e61464c40484d0f424e4c">[email&#160;protected]</span></a>
-    <a href="https://www.linkedin.com/in/bill-marino-53a2a063/" target="_blank" class="btn-ghost">LinkedIn</a>
-    <a href="tel:5702166482" class="btn-ghost">570.216.6482</a>
+  <div class="contact-inner fade-in">
+
+    <div class="contact-exploring">
+      <div class="contact-exploring-label">Currently Exploring</div>
+      <div class="contact-exploring-roles">VP of AI Transformation &nbsp;·&nbsp; EVP AI &nbsp;·&nbsp; Director of AI Engineering<br>Head / VP of Data</div>
+      <div class="contact-exploring-tags">
+        <span class="explore-tag">AI Platform Architecture</span>
+        <span class="explore-tag">Agentic AI Systems</span>
+        <span class="explore-tag">Enterprise Transformation</span>
+        <span class="explore-tag">Data Leadership</span>
+      </div>
+    </div>
+
+    <div class="contact-divider"></div>
+
+    <div class="contact-get-in-touch">
+      <div class="contact-get-label">Get In Touch</div>
+      <h2 class="contact-title">Interested in working together?</h2>
+      <p class="contact-sub">Drop your email and a short note. I'll get back to you within 24 hours.</p>
+    </div>
+
+    <form class="contact-form" onsubmit="handleContactSubmit(event)">
+      <div class="form-row">
+        <input type="text" placeholder="Your name" class="form-input" id="form-name" required />
+        <input type="email" placeholder="your@email.com" class="form-input" id="form-email" required />
+      </div>
+      <input type="text" placeholder="I'm interested in..." class="form-input" id="form-interest" />
+      <textarea placeholder="Tell me a bit about what you're looking for (optional)" class="form-textarea" id="form-message"></textarea>
+      <button type="submit" class="form-submit">Send Message</button>
+      <div id="form-success" class="form-success" style="display:none;">Message sent. I'll get back to you shortly.</div>
+    </form>
+
   </div>
 </div>
 
@@ -1204,12 +1388,45 @@
   <div class="footer-copy">© 2026 Bill Marino</div>
   <div class="footer-links">
     <a href="https://www.linkedin.com/in/bill-marino-53a2a063/" target="_blank">LinkedIn</a>
-    <a href="/cdn-cgi/l/email-protection#d4a3bdb8b8bdb5b9faa6fab9b5a6bdbabb94b3b9b5bdb8fab7bbb9">Email</a>
+    <a id="footer-email" href="#">Email</a>
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
+  // Email protection
+  (function(){
+    var u='william.r.marino';var d='gmail.com';
+    var el=document.getElementById('footer-email');
+    if(el){ el.href='mailto:'+u+'@'+d; }
+  })();
+
+  // Contact form handler - opens mailto
+  function handleContactSubmit(e) {
+    e.preventDefault();
+    var name = document.getElementById('form-name').value;
+    var email = document.getElementById('form-email').value;
+    var interest = document.getElementById('form-interest').value;
+    var message = document.getElementById('form-message').value;
+    var body = 'Name: '+name+'\nFrom: '+email+'\nInterest: '+interest+'\n\n'+message;
+    var u='william.r.marino';var d='gmail.com';
+    window.location.href='mailto:'+u+'@'+d+'?subject=Portfolio Inquiry - '+encodeURIComponent(interest)+'&body='+encodeURIComponent(body);
+    document.getElementById('form-success').style.display='block';
+  }
+
   // Intersection observer for fade-in animations
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
-      if (entry.isIn
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, (i % 4) * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
