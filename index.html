@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bill Marino | VP of AI Transformation & Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b0f;
+    --surface: #0e1318;
+    --surface2: #141b23;
+    --border: #1e2a35;
+    --accent: #e8a045;
+    --accent2: #4a9eff;
+    --text: #e8edf2;
+    --muted: #6b7d8f;
+    --dim: #2a3a4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(8,11,15,0.95), transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(232,160,69,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    bottom: -100px;
+    left: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(74,158,255,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+
+  .hero h1 span {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(232,160,69,0.4);
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--muted);
+    margin-top: 24px;
+    max-width: 600px;
+    line-height: 1.6;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+
+  .hero-subtitle strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    margin-top: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    padding: 14px 28px;
+    background: var(--accent);
+    color: #080b0f;
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: #f0b060;
+    transform: translateY(-2px);
+  }
+
+  .btn-ghost {
+    padding: 14px 28px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* STATS TICKER */
+  .stats-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 48px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  /* SECTION */
+  section {
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 60px;
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin-left: 16px;
+  }
+
+  /* PLATFORMS */
+  .platforms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2px;
+  }
+
+  .platform-card {
+    background: var(--surface);
+    padding: 36px;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  .platform-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .platform-card:hover {
+    background: var(--surface2);
+    border-color: var(--dim);
+  }
+
+  .platform-card:hover::before {
+    opacity: 1;
+  }
+
+  .platform-icon {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .platform-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+
+  .platform-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .platform-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .platform-metric {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .platform-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+  }
+
+  .stack-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    padding: 4px 10px;
+    background: var(--dim);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* IMPACT SECTION */
+  .impact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .impact-card {
+    background: var(--surface);
+    padding: 40px;
+    border: 1px solid var(--border);
+  }
+
+  .impact-card.featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
+    border-color: rgba(232,160,69,0.2);
+  }
+
+  .impact-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .impact-label {
+    font-size: 1rem;
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .impact-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* LEADERSHIP */
+  .leadership-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .leadership-card {
+    background: var(--surface);
+    padding: 36px;
+    border: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .leadership-card:hover {
+    background: var(--surface2);
+  }
+
+  .leadership-icon {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .leadership-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .leadership-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* STACK */
+  .stack-section {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stack-section section {
+    max-width: 1200px;
+  }
+
+  .stack-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 40px;
+  }
+
+  .stack-group-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stack-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stack-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: color 0.2s;
+    cursor: default;
+  }
+
+  .stack-item:hover { color: var(--text); }
+
+  /* RECOGNITION */
+  .recognition-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+  }
+
+  .recognition-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px 36px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    transition: background 0.2s;
+  }
+
+  .recognition-item:hover { background: var(--surface2); }
+
+  .recognition-bullet {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--accent);
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .recognition-text {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .recognition-text strong {
+    color: var(--text);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ABOUT */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .about-left {
+    position: sticky;
+    top: 100px;
+  }
+
+  .about-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .about-role {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 24px;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .about-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+  }
+
+  .about-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .about-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+
+  .about-right p {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .about-right p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .about-conviction {
+    border-left: 2px solid var(--accent);
+    padding-left: 20px;
+    margin-top: 32px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--text);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* CONTACT */
+  .contact-section {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 80px 48px;
+    text-align: center;
+  }
+
+  .contact-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 16px;
+  }
+
+  .contact-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+
+  .contact-links {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--accent); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .stats-bar { padding: 24px; grid-template-columns: repeat(2, 1fr); }
+    section { padding: 60px 24px; }
+    .platforms-grid { grid-template-columns: 1fr; }
+    .impact-grid { grid-template-columns: 1fr; }
+    .impact-card.featured { grid-column: 1; }
+    .leadership-grid { grid-template-columns: 1fr; }
+    .recognition-list { grid-template-columns: 1fr; }
+    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    .about-left { position: static; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+    .contact-section { padding: 60px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">BM</div>
+  <ul class="nav-links">
+    <li><a href="#platforms">Platforms</a></li>
+    <li><a href="#impact">Impact</a></li>
+    <li><a href="#leadership">Leadership</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="hero-tag">Open to VP of AI &amp; Enterprise Transformation Roles</div>
+  <h1>Bill<br><span>Marino</span></h1>
+  <p class="hero-subtitle">
+    <strong>VP of AI Transformation &amp; Data.</strong> Enterprise AI and data executive with 15+ years building mission-critical platforms — and a proven track record leading company-wide AI transformation before most enterprises know where to start.
+  </p>
+  <div class="hero-cta">
+    <a href="#platforms" class="btn-primary">View My Work</a>
+    <a href="#about" class="btn-ghost">Download Resume</a>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num">$75M+</div>
+    <div class="stat-label">Enterprise Value Delivered</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">50+</div>
+    <div class="stat-label">Production Automations</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">300+</div>
+    <div class="stat-label">Global Venues</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">10PB+</div>
+    <div class="stat-label">Data Platform Scale</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">15+</div>
+    <div class="stat-label">Years in Enterprise Tech</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">$28M</div>
+    <div class="stat-label">Annual Budget Owned</div>
+  </div>
+</div>
+
+<!-- PLATFORMS -->
+<div id="platforms">
+<section>
+  <div class="section-header fade-in">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Production Platforms</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="platforms-grid">
+
+    <div class="platform-card fade-in">
+      <span class="platform-icon">⚡</span>
+      <div class="platform-tag">Agentic Infrastructure</div>
+      <div class="platform-name">Enterprise Agentic Landing Zone</div>
+      <p class="platform-desc">Architected and operates the enterprise agentic landing zone on Google Cloud — a governed foundation for autonomous agent deployment with pre-built guardrails, identity controls, and reusable patterns.</p>
+      <div class="platform-metric">▸ Compressed time-to-agent from weeks to days</div>
+      <div class="platform-stack">
+        <span class="stack-tag">Google Cloud</span>
+        <span class="stack-tag">Vertex AI</span>
+        <span class="stack-tag">Agentic AI</span>
+        <span class="stack-tag">IAM</span>
+      </div>
+    </div>
+
+    <div class="platform-card fade-in">
+      <span class="platform-icon">🤖</span>
+      <div class="platform-tag">Autonomous Operations</div>
+      <div class="platform-name">Self-Healing Network</div>
+      <p class="platform-desc">Deployed autonomous AI agents into the network fabric to detect, diagnose, and remediate faults in real time — enabling the network to self-heal without human intervention across 300+ global venues.</p>
+      <div class="platform-metric">▸ Eliminated reactive ops cycles · 300+ venues</div>
+      <div class="platform-stack">
+        <span class="stack-tag">AI Agents</span>
+        <span class="stack-tag">SDN</span>
+        <span class="stack-tag">Google Agentspace</span>
+        <span class="stack-tag">ADK</span>
+      </div>
+    </div>
+
+    <div class="platform-card fade-in">
+      <span class="platform-icon">🔧</span>
+      <div class="platform-tag">Enterprise AI Platform</div>
+      <div class="platform-name">Agentic ITSM Platform</div>
+      <p class="platform-desc">Built an agentic ITSM platform with AI-driven incident triage, intelligent routing, and autonomous resolution with human-in-the-loop controls — cutting MTTR across 300+ global venues.</p>
+      <div class="platform-metric">▸ Autonomous resolution · Human-in-the-loop controls</div>
+      <div class="platform-stack">
+        <span class="stack-tag">LLM Orchestration</span>
+        <span class="stack-tag">Agentic Workflows</span>
+        <span class="stack-tag">HITL</span>
+      </div>
+    </div>
+
+    <div class="platform-card fade-in">
+      <span class="platform-icon">💬</span>
+      <div class="platform-tag">GenAI Customer Experience</div>
+      <div class="platform-name">Generative AI Customer Care Bot</div>
+      <p class="platform-desc">Architected a customer care chatbot combining generative AI for open-ended conversations with deterministic logic for structured decisions — reducing live agent escalations and eliminating manual triage at scale.</p>
+      <div class="platform-metric">▸ Reduced escalations · Eliminated manual triage</div>
+      <div class="platform-stack">
+        <span class="stack-tag">GenAI</span>
+        <span class="stack-tag">LLMs</span>
+        <span class="stack-tag">Deterministic Logic</span>
+      </div>
+    </div>
+
+    <div class="platform-card fade-in">
+      <span class="platform-icon">📊</span>
+      <div class="platform-tag">Customer-Facing Analytics</div>
+      <div class="platform-name">Promoveo Network Analytics</div>
+      <p class="platform-desc">Architected and led Promoveo — a customer-facing analytics platform delivering real-time network performance, SLA reporting, and incident intelligence to 500+ customers including LAX, JFK, AT&T, T-Mobile, and military installations.</p>
+      <div class="platform-metric">▸ 100% contract renewal · $1.25M premium tier upsells · 500+ customers</div>
+      <div class="platform-stack">
+        <span class="stack-tag">BigQuery</span>
+        <span class="stack-tag">Custom APIs</span>
+        <span class="stack-tag">Real-time Analytics</span>
+      </div>
+    </div>
+
+    <div class="platform-card fade-in">
+      <span class="platform-icon">🚀</span>
+      <div class="platform-tag">Developer Productivity</div>
+      <div class="platform-name">GenAI CI/CD Environment</div>
+      <p class="platform-desc">Built a GenAI-enabled CI/CD environment combining AI code generation with automated pipeline deployment — compressing release cycles from 2 weeks to hours and increasing deployment frequency 10x.</p>
+      <div class="platform-metric">▸ 2 weeks → hours · 10x deployment frequency</div>
+      <div class="platform-stack">
+        <span class="stack-tag">AI Code Generation</span>
+        <span class="stack-tag">CI/CD Automation</span>
+        <span class="stack-tag">GitHub Actions</span>
+      </div>
+    </div>
+
+    <div class="platform-card fade-in">
+      <span class="platform-icon">🗄️</span>
+      <div class="platform-tag">Data Foundation</div>
+      <div class="platform-name">10PB+ Multi-Cloud Data Lake</div>
+      <p class="platform-desc">Built the enterprise data lake from scratch on Snowflake, scaled it to 10PB+, and led the full migration to GCP BigQuery as the production intelligence layer — featured in Snowflake's official customer case study.</p>
+      <div class="platform-metric">▸ 10PB+ scale · Snowflake case study · MCP layer for AI agents</div>
+      <div class="platform-stack">
+        <span class="stack-tag">Snowflake</span>
+        <span class="stack-tag">BigQuery</span>
+        <span class="stack-tag">Redshift</span>
+        <span class="stack-tag">MCP</span>
+        <span class="stack-tag">Kafka</span>
+      </div>
+    </div>
+
+    <div class="platform-card fade-in">
+      <span class="platform-icon">🏛️</span>
+      <div class="platform-tag">AI Governance</div>
+      <div class="platform-name">AI Center of Excellence</div>
+      <p class="platform-desc">Built the Data & AI Center of Excellence — standardizing AI patterns, governance frameworks, model lifecycle management, and reusable tooling. Executed a company-wide AI transformation adopted across 350+ people.</p>
+      <div class="platform-metric">▸ 350+ people · 5 business functions · Deployment: 2 weeks → 1 day</div>
+      <div class="platform-stack">
+        <span class="stack-tag">AI Governance</span>
+        <span class="stack-tag">MLOps</span>
+        <span class="stack-tag">Model Lifecycle</span>
+        <span class="stack-tag">HITL</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+
+<!-- IMPACT -->
+<div id="impact" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+<section>
+  <div class="section-header fade-in">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Quantified Impact</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="impact-grid">
+    <div class="impact-card featured fade-in">
+      <div class="impact-num">$75M+</div>
+      <div class="impact-label">Total Enterprise Value Delivered</div>
+      <p class="impact-desc">Deploying AI where it replaced real work — automating manual operations, eliminating IT bottlenecks, and turning raw data into decisions executives actually used. Across production agentic systems, GenAI platforms, and decision intelligence built from architecture to autonomous operation.</p>
+    </div>
+    <div class="impact-card fade-in">
+      <div class="impact-num">$30M+</div>
+      <div class="impact-label">Platform Cost Savings</div>
+      <p class="impact-desc">Through AI-enabled automated data operations, cloud efficiency programs, and SaaS spend optimization.</p>
+    </div>
+    <div class="impact-card fade-in">
+      <div class="impact-num">10x</div>
+      <div class="impact-label">Deployment Frequency</div>
+      <p class="impact-desc">GenAI-enabled CI/CD compressed release cycles from 2 weeks to hours and increased deployment frequency 10x.</p>
+    </div>
+    <div class="impact-card fade-in">
+      <div class="impact-num">70%</div>
+      <div class="impact-label">Reduction in Inconsistent Reporting</div>
+      <p class="impact-desc">Unified enterprise data governance across master data, lineage, quality, and access controls — enabling confident data-driven decisions at scale.</p>
+    </div>
+    <div class="impact-card fade-in">
+      <div class="impact-num">100%</div>
+      <div class="impact-label">Contract Renewal Rate</div>
+      <p class="impact-desc">Promoveo analytics platform drove 100% contract renewal across 500+ customers and $1.25M in premium tier upsells.</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- LEADERSHIP -->
+<div id="leadership">
+<section>
+  <div class="section-header fade-in">
+    <span class="section-num">03</span>
+    <h2 class="section-title">How I Lead</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="leadership-grid">
+    <div class="leadership-card fade-in">
+      <div class="leadership-icon">◈</div>
+      <div class="leadership-title">AI Strategy & Roadmap</div>
+      <p class="leadership-desc">Translate business problems into a prioritized, investment-aligned AI roadmap through continuous field discovery. Owned $28M annual budget directing $10–15M toward AI and platform investment.</p>
+    </div>
+    <div class="leadership-card fade-in">
+      <div class="leadership-icon">◎</div>
+      <div class="leadership-title">Forward-Deployed Execution</div>
+      <p class="leadership-desc">Built a rapid-deployment AI team with full autonomy to prototype and pilot solutions end-to-end — compressing time from idea to working pilot from months to weeks.</p>
+    </div>
+    <div class="leadership-card fade-in">
+      <div class="leadership-icon">◆</div>
+      <div class="leadership-title">Cross-Functional Embedding</div>
+      <p class="leadership-desc">Embedded directly with finance, HR, content, and sales operations to deploy AI and automation — eliminating manual processes and enabling the company to scale without adding headcount.</p>
+    </div>
+    <div class="leadership-card fade-in">
+      <div class="leadership-icon">⚙</div>
+      <div class="leadership-title">People-First AI Organization</div>
+      <p class="leadership-desc">Built an AI org grounded in autonomy, mastery, and purpose — scaling team capabilities without external hires through deliberate reskilling, leadership development, and succession planning.</p>
+    </div>
+    <div class="leadership-card fade-in">
+      <div class="leadership-icon">◉</div>
+      <div class="leadership-title">AI Governance at Scale</div>
+      <p class="leadership-desc">Established enterprise AI governance framework — model lifecycle management, human-in-the-loop controls, safety guardrails, and usage policies ensuring responsible, compliant AI deployment at scale.</p>
+    </div>
+    <div class="leadership-card fade-in">
+      <div class="leadership-icon">◇</div>
+      <div class="leadership-title">Strategic Partnerships</div>
+      <p class="leadership-desc">Forged partnerships with AWS, GCP, Snowflake, and industry alliances to secure early access to emerging AI capabilities and keep the platform roadmap ahead of the market.</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- STACK -->
+<div id="stack" class="stack-section">
+<section>
+  <div class="section-header fade-in">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Technology Stack</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="stack-groups">
+    <div class="fade-in">
+      <div class="stack-group-label">AI & Agentic</div>
+      <div class="stack-items">
+        <div class="stack-item">Claude · Gemini for Enterprise</div>
+        <div class="stack-item">Vertex AI · OpenAI GPT-4</div>
+        <div class="stack-item">Agentic Orchestration</div>
+        <div class="stack-item">Google Agentspace · ADK</div>
+        <div class="stack-item">AI Coding Assistants</div>
+        <div class="stack-item">MLOps · Model Lifecycle</div>
+        <div class="stack-item">Human-in-the-Loop Controls</div>
+      </div>
+    </div>
+    <div class="fade-in">
+      <div class="stack-group-label">Data & Analytics</div>
+      <div class="stack-items">
+        <div class="stack-item">BigQuery · Snowflake</div>
+        <div class="stack-item">AWS Redshift</div>
+        <div class="stack-item">Kafka · Pub/Sub</div>
+        <div class="stack-item">Looker · Real-Time Analytics</div>
+        <div class="stack-item">ETL/ELT Pipelines</div>
+        <div class="stack-item">Event-Driven Architectures</div>
+        <div class="stack-item">MCP Layer</div>
+      </div>
+    </div>
+    <div class="fade-in">
+      <div class="stack-group-label">Cloud & Engineering</div>
+      <div class="stack-items">
+        <div class="stack-item">GCP · AWS</div>
+        <div class="stack-item">Python · SQL</div>
+        <div class="stack-item">Apache Airflow</div>
+        <div class="stack-item">REST APIs · Microservices</div>
+        <div class="stack-item">CI/CD Automation</div>
+        <div class="stack-item">Workflow Orchestration</div>
+        <div class="stack-item">Internal Developer Platforms</div>
+      </div>
+    </div>
+    <div class="fade-in">
+      <div class="stack-group-label">Governance & Leadership</div>
+      <div class="stack-items">
+        <div class="stack-item">AI Governance · AI Security</div>
+        <div class="stack-item">Data Lineage · MDM</div>
+        <div class="stack-item">SOC 2 · GDPR/CCPA</div>
+        <div class="stack-item">AI Adoption Roadmap</div>
+        <div class="stack-item">Multi-Year Roadmapping</div>
+        <div class="stack-item">Budget Ownership</div>
+        <div class="stack-item">Vendor Portfolio Management</div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- RECOGNITION -->
+<div>
+<section>
+  <div class="section-header fade-in">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Recognition & Publications</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="recognition-list">
+    <div class="recognition-item fade-in">
+      <div class="recognition-bullet">◈</div>
+      <div class="recognition-text">
+        <strong>Co-Author, "AI in Wi-Fi" — Wireless Broadband Alliance</strong>
+        Defined AI's role in next-gen Wi-Fi performance and reliability for the global industry framework.
+      </div>
+    </div>
+    <div class="recognition-item fade-in">
+      <div class="recognition-bullet">◆</div>
+      <div class="recognition-text">
+        <strong>Keynote Speaker — WBA Conference</strong>
+        AI's role in next-generation wireless connectivity and network operations.
+      </div>
+    </div>
+    <div class="recognition-item fade-in">
+      <div class="recognition-bullet">◎</div>
+      <div class="recognition-text">
+        <strong>Speaker — AWS re:Invent</strong>
+        Boingo's enterprise AWS adoption for scalable data infrastructure and real-time analytics.
+      </div>
+    </div>
+    <div class="recognition-item fade-in">
+      <div class="recognition-bullet">◉</div>
+      <div class="recognition-text">
+        <strong>Published Case Study — Snowflake & Boingo Wireless</strong>
+        Enterprise data cloud unifying network telemetry, analytics, and operational insights. Featured on snowflake.com.
+      </div>
+    </div>
+    <div class="recognition-item fade-in">
+      <div class="recognition-bullet">◇</div>
+      <div class="recognition-text">
+        <strong>Wharton Executive CTO Program — University of Pennsylvania, 2024</strong>
+        Executive Presence & Influence · Driving Strategic Innovation · Leading a Technology-Driven Organization
+      </div>
+    </div>
+    <div class="recognition-item fade-in">
+      <div class="recognition-bullet">◤</div>
+      <div class="recognition-text">
+        <strong>13-Year Track Record at Boingo Wireless</strong>
+        Data Engineer → VP of Engineering, AI, Data Engineering & Enterprise Technology
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- ABOUT -->
+<div id="about" style="background: var(--surface); border-top: 1px solid var(--border);">
+<section>
+  <div class="section-header fade-in">
+    <span class="section-num">06</span>
+    <h2 class="section-title">About</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-left fade-in">
+      <div class="about-name">Bill<br>Marino</div>
+      <div class="about-role">VP of AI Transformation & Data</div>
+      <div style="color: var(--muted); font-size: 0.85rem;">Nashville, TN · Open to Relocation</div>
+
+      <div class="about-stats">
+        <div class="about-stat">
+          <div class="about-stat-num">15+</div>
+          <div class="about-stat-label">Years</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-num">$75M+</div>
+          <div class="about-stat-label">Value</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-num">50+</div>
+          <div class="about-stat-label">Automations</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-num">0→1</div>
+          <div class="about-stat-label">Builder</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-right fade-in">
+      <p>Enterprise AI and data executive with <strong>15+ years building mission-critical data platforms</strong> — and a proven track record leading company-wide AI transformation before most enterprises know where to start.</p>
+
+      <p>At Boingo Wireless, I built the data foundation from scratch: brought in <strong>Snowflake to construct the enterprise data lake, scaled it to 10PB+, then led the full migration to GCP BigQuery</strong> as the production intelligence layer powering every AI system across 300+ global venues.</p>
+
+      <p>I'm a <strong>practitioner-executive who leads from the front</strong> — embedding directly with business functions, building to production, and redeploying to the next problem. Finance, HR, network ops, sales — I've deployed AI inside all of them. My AI transformation strategy was adopted across 350+ people, delivering 50+ production automations across 5 business functions.</p>
+
+      <p>Trusted <strong>C-suite and Board partner</strong> for AI strategy, investment alignment, and enterprise transformation. Wharton Executive CTO Program graduate. AWS re:Invent speaker. WBA AI co-author.</p>
+
+      <div class="about-conviction">
+        "Technology should scale the business, not just support it."
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- CONTACT -->
+<div class="contact-section">
+  <h2 class="contact-title fade-in">Let's Talk</h2>
+  <p class="contact-sub fade-in">Open to VP of AI, Enterprise Automation, and Data leadership roles.</p>
+  <div class="contact-links fade-in">
+    <a href="mailto:william.r.marino@gmail.com" class="btn-primary">william.r.marino@gmail.com</a>
+    <a href="https://www.linkedin.com/in/bill-marino-53a2a063/" target="_blank" class="btn-ghost">LinkedIn</a>
+    <a href="tel:5702166482" class="btn-ghost">570.216.6482</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2026 Bill Marino</div>
+  <div class="footer-links">
+    <a href="https://www.linkedin.com/in/bill-marino-53a2a063/" target="_blank">LinkedIn</a>
+    <a href="mailto:william.r.marino@gmail.com">Email</a>
+  </div>
+</footer>
+
+<script>
+  // Intersection observer for fade-in animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, (i % 4) * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
