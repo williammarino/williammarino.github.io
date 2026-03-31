@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snowflake → BigQuery Migration | Bill Marino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b0f;
+    --surface: #0e1318;
+    --surface2: #141b23;
+    --border: #1e2a35;
+    --accent: #e8a045;
+    --accent2: #4a9eff;
+    --text: #e8edf2;
+    --muted: #6b7d8f;
+    --dim: #2a3a4a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(8,11,15,0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .nav-back {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--accent); }
+
+  .hero-grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .hero {
+    padding: 140px 48px 80px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .platform-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .hero-summary {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 680px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.3s forwards;
+  }
+  .hero-summary strong { color: var(--text); font-weight: 500; }
+
+  .metrics-row {
+    display: flex;
+    gap: 2px;
+    margin-top: 48px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px 32px;
+    flex: 1;
+  }
+  .metric-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .metric-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 48px 100px;
+  }
+  .section {
+    margin-bottom: 72px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .section.visible { opacity: 1; transform: none; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.85;
+    margin-bottom: 16px;
+  }
+  p strong { color: var(--text); font-weight: 500; }
+
+  /* Timeline */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: background 0.2s;
+  }
+  .timeline-item:hover { background: var(--surface2); }
+  .timeline-phase {
+    background: var(--surface2);
+    padding: 24px 20px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .timeline-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .timeline-phase-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .timeline-content {
+    padding: 24px 28px;
+  }
+  .timeline-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .timeline-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0;
+  }
+  .timeline-desc strong { color: var(--text); font-weight: 500; }
+
+  /* Comparison table */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .compare-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+  }
+  .compare-card.before { border-top: 2px solid var(--muted); }
+  .compare-card.after { border-top: 2px solid var(--accent); }
+  .compare-header {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-card.before .compare-header { color: var(--muted); }
+  .compare-card.after .compare-header { color: var(--accent); }
+  .compare-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+  }
+  .compare-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+  .before .compare-dot { background: var(--muted); }
+  .after .compare-dot { background: var(--accent); }
+  .compare-text {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .compare-text strong { color: var(--text); font-weight: 500; }
+
+  /* Decision list */
+  .decision-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .decision-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
+    align-items: start;
+    transition: background 0.2s;
+  }
+  .decision-item:hover { background: var(--surface2); }
+  .decision-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  .decision-text {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .decision-text strong { color: var(--text); font-weight: 500; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+  }
+  .info-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+  .info-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .info-card p { font-size: 0.85rem; margin-bottom: 0; }
+
+  .stack-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .stack-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 6px 14px;
+    background: var(--dim);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .stack-pill:hover { border-color: var(--accent); color: var(--accent); }
+
+  .platform-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .platform-nav a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: color 0.2s;
+  }
+  .platform-nav a:hover { color: var(--accent); }
+
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .hero, .content { padding-left: 24px; padding-right: 24px; }
+    .metrics-row { flex-direction: column; }
+    .two-col, .compare-grid { grid-template-columns: 1fr; }
+    .timeline-item { grid-template-columns: 80px 1fr; }
+    .decision-item { grid-template-columns: 1fr; gap: 8px; }
+    .platform-nav { padding: 24px; flex-direction: column; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero-grid-bg"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">BM</a>
+  <a href="index.html#platforms" class="nav-back">← All Platforms</a>
+</nav>
+
+<div class="hero">
+  <div class="platform-tag">Data Platform · Architecture Decision</div>
+  <h1>Snowflake <em>→</em><br>BigQuery</h1>
+  <p class="hero-summary">
+    Built the enterprise data lake from scratch on Snowflake, <strong>scaled it to 10PB+ and earned a Snowflake customer case study</strong>, then made the architectural call to migrate the entire platform to GCP BigQuery. A story about judgment, not just execution.
+  </p>
+
+  <div class="metrics-row">
+    <div class="metric">
+      <div class="metric-num">10PB+</div>
+      <div class="metric-label">Data Scale Migrated</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">0→1</div>
+      <div class="metric-label">Built from Scratch</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">Case Study</div>
+      <div class="metric-label">Snowflake.com Featured</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">GCP-Native</div>
+      <div class="metric-label">Final Architecture</div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- CONTEXT -->
+  <div class="section">
+    <div class="section-label">Context</div>
+    <h2>Started with nothing. Built something worth writing about.</h2>
+    <p>
+      When this work began, there was no enterprise data foundation. Raw data sat in silos — network telemetry, operational systems, customer data — with no unified layer for analytics, reporting, or eventually AI.
+    </p>
+    <p>
+      The decision to build on <strong>Snowflake</strong> was deliberate: a cloud-native warehouse with strong multi-cloud support, mature governance, and the ability to scale without infrastructure management overhead. The platform was built from scratch — schema design, ingestion pipelines, governance frameworks, analytics layers — and scaled to serve real-time intelligence across 300+ global venues.
+    </p>
+    <p>
+      It worked well enough that <strong>Snowflake featured the work in an official customer case study</strong> on snowflake.com — recognizing the S.M.A.R.T. network analytics and operational intelligence architecture.
+    </p>
+  </div>
+
+  <!-- THE CASE FOR MIGRATION -->
+  <div class="section">
+    <div class="section-label">The Decision</div>
+    <h2>Why migrate a platform that was working?</h2>
+    <p>
+      This is the question that matters. The Snowflake platform was functioning well. Moving it carried real risk — data integrity, pipeline continuity, team retraining, cost. The case for migration had to be stronger than "GCP is newer."
+    </p>
+
+    <div class="compare-grid">
+      <div class="compare-card before">
+        <div class="compare-header">Snowflake Platform</div>
+        <div class="compare-item">
+          <div class="compare-dot"></div>
+          <div class="compare-text"><strong>Strong analytics layer</strong> — warehouse-first architecture optimized for SQL-based querying</div>
+        </div>
+        <div class="compare-item">
+          <div class="compare-dot"></div>
+          <div class="compare-text"><strong>Multi-cloud capable</strong> — ran across AWS and GCP with data sharing features</div>
+        </div>
+        <div class="compare-item">
+          <div class="compare-dot"></div>
+          <div class="compare-text"><strong>Separate cost model</strong> — compute and storage pricing outside the primary cloud spend</div>
+        </div>
+        <div class="compare-item">
+          <div class="compare-dot"></div>
+          <div class="compare-text"><strong>Separate ecosystem</strong> — integrations with GCP AI/ML stack required additional plumbing</div>
+        </div>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-header">BigQuery Platform</div>
+        <div class="compare-item">
+          <div class="compare-dot"></div>
+          <div class="compare-text"><strong>Native GCP integration</strong> — directly connected to Vertex AI, Agentspace, Pub/Sub, and the full agentic infrastructure</div>
+        </div>
+        <div class="compare-item">
+          <div class="compare-dot"></div>
+          <div class="compare-text"><strong>Agent-native access</strong> — MCP layer on BigQuery enables AI agents to query live data without cross-cloud hops</div>
+        </div>
+        <div class="compare-item">
+          <div class="compare-dot"></div>
+          <div class="compare-text"><strong>Unified cost model</strong> — consolidated cloud spend with GCP committed use discounts applied across the stack</div>
+        </div>
+        <div class="compare-item">
+          <div class="compare-dot"></div>
+          <div class="compare-text"><strong>Serverless at scale</strong> — no cluster management, cost-per-query model aligned with variable workloads</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASES -->
+  <div class="section">
+    <div class="section-label">How It Was Done</div>
+    <h2>Phases of migration</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">
+          <div class="timeline-num">01</div>
+          <div class="timeline-phase-label">Foundation</div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-title">Build the Snowflake platform to production maturity</div>
+          <p class="timeline-desc">Designed and built the full data lake on Snowflake — ingestion pipelines, transformation layers, governance framework, analytics surfaces. Scaled to 10PB+ serving real-time intelligence across 300+ venues. <strong>Earned the Snowflake case study at this stage.</strong></p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">
+          <div class="timeline-num">02</div>
+          <div class="timeline-phase-label">Decision</div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-title">Make the architectural case for GCP consolidation</div>
+          <p class="timeline-desc">As the agentic AI strategy matured, the friction of operating a separate data platform outside the primary GCP ecosystem became the constraint. The decision was made to <strong>consolidate onto BigQuery</strong> — not because Snowflake failed, but because the future architecture required native AI integration.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">
+          <div class="timeline-num">03</div>
+          <div class="timeline-phase-label">Migration</div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-title">Migrate pipelines, schemas, and governance to BigQuery</div>
+          <p class="timeline-desc">Rebuilt ingestion pipelines, translated schema designs, migrated transformation logic, and re-established governance controls on BigQuery. <strong>Maintained production continuity throughout</strong> — no data gaps, no analytics downtime.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">
+          <div class="timeline-num">04</div>
+          <div class="timeline-phase-label">Integration</div>
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-title">Build the MCP layer — enabling agent-native data access</div>
+          <p class="timeline-desc">With BigQuery as the production intelligence layer, <strong>built the MCP interface on top</strong> — enabling AI agents across the enterprise to query live production data directly as part of their decision loops. This was the architecture the migration was designed to enable.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY DECISIONS -->
+  <div class="section">
+    <div class="section-label">Key Decisions</div>
+    <h2>What the migration required</h2>
+
+    <div class="decision-list">
+      <div class="decision-item">
+        <div class="decision-tag">Timing</div>
+        <div class="decision-text"><strong>Migrate after proving the platform, not before.</strong> The Snowflake platform was built to production maturity first — including the case study. Migration happened when the architectural reason was clear, not because of platform preference.</div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-tag">Continuity</div>
+        <div class="decision-text"><strong>No analytics downtime as a hard requirement.</strong> 300+ venues and hundreds of internal stakeholders depended on continuous data availability. The migration was phased to maintain production SLAs throughout.</div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-tag">Rationale</div>
+        <div class="decision-text"><strong>The migration unlocked the agentic architecture.</strong> The primary reason to consolidate onto BigQuery was to enable native integration with the GCP AI stack — Vertex AI, Agentspace, ADK — and to build the MCP layer that made agent-native data access possible.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="section">
+    <div class="section-label">Impact</div>
+    <h2>What it enabled</h2>
+    <div class="two-col">
+      <div class="info-card">
+        <div class="info-card-label">Recognition</div>
+        <div class="info-card-title">Snowflake customer case study</div>
+        <p>The Snowflake-era platform was featured in an official case study on snowflake.com — recognizing the S.M.A.R.T. network analytics architecture and enterprise data cloud implementation.</p>
+        <a href="https://www.snowflake.com/en/customers/all-customers/case-study/boingo/" target="_blank" style="display:inline-block; margin-top:12px; font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--accent2); text-decoration:none; letter-spacing:0.1em; border-bottom: 1px solid rgba(74,158,255,0.3); padding-bottom:2px;">↗ Read the Case Study</a>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Architecture</div>
+        <div class="info-card-title">GCP-native AI foundation</div>
+        <p>BigQuery became the production intelligence layer powering every AI system — directly integrated with Vertex AI, Agentspace, and the MCP interface for agent-native data access.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Cost</div>
+        <div class="info-card-title">Unified cloud spend</div>
+        <p>Consolidating onto GCP eliminated cross-cloud data transfer costs and enabled committed use discounts across the full stack — contributing to $30M+ in platform cost savings.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Signal</div>
+        <div class="info-card-title">Architectural judgment at scale</div>
+        <p>The willingness to migrate a working, featured platform when the architecture demanded it — and execute it without disruption — demonstrates the judgment required at the VP and EVP level.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STACK -->
+  <div class="section">
+    <div class="section-label">Technology</div>
+    <h2>Stack</h2>
+    <div class="stack-row">
+      <span class="stack-pill">Snowflake</span>
+      <span class="stack-pill">Google BigQuery</span>
+      <span class="stack-pill">GCP</span>
+      <span class="stack-pill">Kafka</span>
+      <span class="stack-pill">Pub/Sub</span>
+      <span class="stack-pill">ELT Pipelines</span>
+      <span class="stack-pill">Apache Airflow</span>
+      <span class="stack-pill">Data Governance</span>
+      <span class="stack-pill">Data Lineage</span>
+      <span class="stack-pill">Python</span>
+      <span class="stack-pill">SQL</span>
+      <span class="stack-pill">Vertex AI</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="platform-nav">
+  <a href="platform-mcp-bigquery.html">← MCP Layer on BigQuery</a>
+  <a href="platform-streaming-pipeline.html">Next: Real-Time Streaming Pipeline →</a>
+</div>
+
+<footer>
+  <div class="footer-copy">© 2026 Bill Marino</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

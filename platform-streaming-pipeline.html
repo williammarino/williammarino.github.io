@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real-Time Streaming Pipeline | Bill Marino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b0f;
+    --surface: #0e1318;
+    --surface2: #141b23;
+    --border: #1e2a35;
+    --accent: #e8a045;
+    --accent2: #4a9eff;
+    --text: #e8edf2;
+    --muted: #6b7d8f;
+    --dim: #2a3a4a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(8,11,15,0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .nav-back {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--accent); }
+
+  .hero-grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .hero {
+    padding: 140px 48px 80px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .platform-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .hero-summary {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 680px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.3s forwards;
+  }
+  .hero-summary strong { color: var(--text); font-weight: 500; }
+
+  .metrics-row {
+    display: flex;
+    gap: 2px;
+    margin-top: 48px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px 32px;
+    flex: 1;
+  }
+  .metric-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .metric-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 48px 100px;
+  }
+  .section {
+    margin-bottom: 72px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .section.visible { opacity: 1; transform: none; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.85;
+    margin-bottom: 16px;
+  }
+  p strong { color: var(--text); font-weight: 500; }
+
+  /* Architecture diagram */
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 40px;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .arch-diagram::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,255,0.04) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .arch-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .arch-layer {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .arch-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 12px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 0.05em;
+    transition: border-color 0.2s;
+    min-width: 140px;
+  }
+  .arch-node:hover { border-color: var(--accent); }
+  .arch-node.highlight {
+    background: rgba(232,160,69,0.08);
+    border-color: rgba(232,160,69,0.4);
+    color: var(--accent);
+  }
+  .arch-node.blue {
+    background: rgba(74,158,255,0.08);
+    border-color: rgba(74,158,255,0.3);
+    color: var(--accent2);
+  }
+  .arch-arrow {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+    color: var(--dim);
+    font-size: 1.2rem;
+  }
+  .arch-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  /* Use cases */
+  .use-cases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .use-case {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px;
+    transition: background 0.2s;
+  }
+  .use-case:hover { background: var(--surface2); }
+  .use-case-icon {
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+  }
+  .use-case-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .use-case-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+  }
+  .info-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+  .info-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .info-card p { font-size: 0.85rem; margin-bottom: 0; }
+
+  /* Design principles */
+  .principles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .principle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 20px;
+    align-items: start;
+    transition: background 0.2s;
+  }
+  .principle:hover { background: var(--surface2); }
+  .principle-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  .principle-text {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .principle-text strong { color: var(--text); font-weight: 500; }
+
+  .stack-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .stack-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 6px 14px;
+    background: var(--dim);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .stack-pill:hover { border-color: var(--accent); color: var(--accent); }
+
+  .platform-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .platform-nav a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: color 0.2s;
+  }
+  .platform-nav a:hover { color: var(--accent); }
+
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 24px 48px;
+  }
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .hero, .content { padding-left: 24px; padding-right: 24px; }
+    .metrics-row { flex-direction: column; }
+    .two-col, .use-cases { grid-template-columns: 1fr; }
+    .principle { grid-template-columns: 1fr; gap: 8px; }
+    .platform-nav { padding: 24px; flex-direction: column; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero-grid-bg"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">BM</a>
+  <a href="index.html#platforms" class="nav-back">← All Platforms</a>
+</nav>
+
+<div class="hero">
+  <div class="platform-tag">Data Infrastructure · Event-Driven Architecture</div>
+  <h1>Real-Time<br><em>Streaming</em> Pipeline</h1>
+  <p class="hero-summary">
+    Built and operated enterprise-scale <strong>event-driven streaming infrastructure</strong> using Kafka and Pub/Sub — delivering mission-critical telemetry and network analytics across 300+ global venues with production-grade reliability. The data foundation that powered every AI system built on top of it.
+  </p>
+
+  <div class="metrics-row">
+    <div class="metric">
+      <div class="metric-num">300+</div>
+      <div class="metric-label">Global Venues</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">Real-Time</div>
+      <div class="metric-label">Telemetry Delivery</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">10PB+</div>
+      <div class="metric-label">Data Processed</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">Mission-Critical</div>
+      <div class="metric-label">Production SLAs</div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- THE PROBLEM -->
+  <div class="section">
+    <div class="section-label">The Problem</div>
+    <h2>Static data can't run a real-time network.</h2>
+    <p>
+      Operating a wireless network across 300+ global venues — airports, military installations, enterprise campuses — requires intelligence that moves at the speed of the network itself. Batch processing and nightly ETL jobs don't cut it when a network fault at LAX affects thousands of travelers in real time.
+    </p>
+    <p>
+      Every AI system built on top of the data platform — the self-healing network agent, the ITSM platform, the customer care chatbot — needed <strong>live data, not yesterday's data</strong>. The streaming pipeline is the infrastructure that made real-time AI operations possible.
+    </p>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div class="section">
+    <div class="section-label">Architecture Pattern</div>
+    <h2>Event-driven from source to intelligence</h2>
+
+    <div class="arch-diagram">
+      <div class="arch-flow">
+
+        <div class="arch-label">Event Sources</div>
+        <div class="arch-layer">
+          <div class="arch-node blue">Network Devices</div>
+          <div class="arch-node blue">Venue Systems</div>
+          <div class="arch-node blue">Operational Apps</div>
+          <div class="arch-node blue">Customer Data</div>
+        </div>
+
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-label">Ingestion Layer</div>
+        <div class="arch-layer">
+          <div class="arch-node highlight">Kafka</div>
+          <div class="arch-node highlight">GCP Pub/Sub</div>
+        </div>
+
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-label">Stream Processing</div>
+        <div class="arch-layer">
+          <div class="arch-node">Real-Time ELT</div>
+          <div class="arch-node">Event-Driven Transforms</div>
+          <div class="arch-node">Pipeline SLAs</div>
+        </div>
+
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-label">Storage & Serving</div>
+        <div class="arch-layer">
+          <div class="arch-node highlight">BigQuery — Intelligence Layer</div>
+        </div>
+
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-label">Consumers</div>
+        <div class="arch-layer">
+          <div class="arch-node blue">AI Agents</div>
+          <div class="arch-node blue">Promoveo Analytics</div>
+          <div class="arch-node blue">Network Ops</div>
+          <div class="arch-node blue">Executive Dashboards</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT IT POWERS -->
+  <div class="section">
+    <div class="section-label">What It Powers</div>
+    <h2>Every AI system runs on this foundation</h2>
+    <div class="use-cases">
+      <div class="use-case">
+        <div class="use-case-icon">🤖</div>
+        <div class="use-case-title">Self-Healing Network</div>
+        <p class="use-case-desc">Autonomous AI agents detect and remediate network faults by consuming real-time telemetry events as they happen — not from a batch report hours later.</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">🔧</div>
+        <div class="use-case-title">Agentic ITSM</div>
+        <p class="use-case-desc">Incident triage and autonomous resolution depends on live operational event streams — routing decisions are made on current state, not stale snapshots.</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">📊</div>
+        <div class="use-case-title">Promoveo Analytics</div>
+        <p class="use-case-desc">Real-time network performance, SLA uptime, and capacity intelligence delivered to 500+ customers is only possible because the underlying data moves in real time.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESIGN PRINCIPLES -->
+  <div class="section">
+    <div class="section-label">Design Principles</div>
+    <h2>How it was built to last</h2>
+
+    <div class="principles">
+      <div class="principle">
+        <div class="principle-tag">Reliability</div>
+        <div class="principle-text"><strong>Production-grade pipeline SLAs as a hard constraint.</strong> Mission-critical networks don't tolerate data gaps. The streaming infrastructure was built with redundancy, retry logic, and monitoring to maintain SLAs continuously across 300+ venues.</div>
+      </div>
+      <div class="principle">
+        <div class="principle-tag">Scale</div>
+        <div class="principle-text"><strong>Designed for 10PB+ without re-architecture.</strong> Horizontal scaling patterns and partitioned Kafka topics meant the pipeline could grow with the data volume without requiring fundamental redesign as the platform scaled.</div>
+      </div>
+      <div class="principle">
+        <div class="principle-tag">Latency</div>
+        <div class="principle-text"><strong>Real-time means seconds, not minutes.</strong> Event-driven architecture with direct streaming into BigQuery via Pub/Sub eliminated the latency of batch ETL windows — telemetry is available for AI consumption within seconds of the event occurring.</div>
+      </div>
+      <div class="principle">
+        <div class="principle-tag">Governance</div>
+        <div class="principle-text"><strong>Streaming data inherits the governance framework.</strong> Data quality, lineage, and access controls were applied at the pipeline layer — not retrofitted downstream. Every event that enters the platform is governed from the moment it arrives.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="section">
+    <div class="section-label">Impact</div>
+    <h2>What it made possible</h2>
+    <div class="two-col">
+      <div class="info-card">
+        <div class="info-card-label">Operations</div>
+        <div class="info-card-title">AI operates at network speed</div>
+        <p>The self-healing network and agentic ITSM platform both depend on streaming telemetry. Without real-time data, autonomous remediation isn't possible — you're just reacting to incidents you already know about.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Customer Value</div>
+        <div class="info-card-title">Live SLA reporting to 500+ customers</div>
+        <p>Promoveo delivers real-time network performance and SLA uptime data to enterprise customers — possible only because the streaming pipeline feeds the analytics layer continuously.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Foundation</div>
+        <div class="info-card-title">The base layer for $75M+ in value</div>
+        <p>Every AI system and analytics product built on top of the data platform runs on this streaming foundation. The $75M+ in quantified enterprise value delivered traces back to having reliable, real-time data to work with.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Scale</div>
+        <div class="info-card-title">Global coverage without centralized brittleness</div>
+        <p>300+ venues across airports, military installations, and enterprise campuses — each generating continuous telemetry — handled through a distributed event architecture that scales horizontally.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STACK -->
+  <div class="section">
+    <div class="section-label">Technology</div>
+    <h2>Stack</h2>
+    <div class="stack-row">
+      <span class="stack-pill">Apache Kafka</span>
+      <span class="stack-pill">GCP Pub/Sub</span>
+      <span class="stack-pill">Google BigQuery</span>
+      <span class="stack-pill">Real-Time ELT</span>
+      <span class="stack-pill">Event-Driven Architecture</span>
+      <span class="stack-pill">Apache Airflow</span>
+      <span class="stack-pill">Python</span>
+      <span class="stack-pill">SQL</span>
+      <span class="stack-pill">GCP</span>
+      <span class="stack-pill">Data Lineage</span>
+      <span class="stack-pill">Pipeline SLAs</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="platform-nav">
+  <a href="platform-snowflake-bq.html">← Snowflake → BigQuery Migration</a>
+  <a href="index.html#platforms">All Platforms →</a>
+</div>
+
+<footer>
+  <div class="footer-copy">© 2026 Bill Marino</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

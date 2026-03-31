@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP Layer on BigQuery | Bill Marino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b0f;
+    --surface: #0e1318;
+    --surface2: #141b23;
+    --border: #1e2a35;
+    --accent: #e8a045;
+    --accent2: #4a9eff;
+    --text: #e8edf2;
+    --muted: #6b7d8f;
+    --dim: #2a3a4a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(8,11,15,0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .nav-back {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--accent); }
+
+  .hero {
+    padding: 140px 48px 80px;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .hero-grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .platform-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .hero-summary {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 680px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.3s forwards;
+  }
+  .hero-summary strong { color: var(--text); font-weight: 500; }
+
+  .metrics-row {
+    display: flex;
+    gap: 2px;
+    margin-top: 48px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px 32px;
+    flex: 1;
+  }
+  .metric-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .metric-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 48px 100px;
+  }
+
+  .section {
+    margin-bottom: 72px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .section.visible { opacity: 1; transform: none; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.85;
+    margin-bottom: 16px;
+  }
+  p strong { color: var(--text); font-weight: 500; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 8px;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+  }
+
+  .info-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+
+  .info-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .info-card p {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+  }
+
+  /* Architecture diagram */
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 40px;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .arch-diagram::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,255,0.04) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .arch-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .arch-layer {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .arch-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 12px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 0.05em;
+    transition: border-color 0.2s;
+    min-width: 140px;
+  }
+
+  .arch-node:hover { border-color: var(--accent); }
+
+  .arch-node.highlight {
+    background: rgba(232,160,69,0.08);
+    border-color: rgba(232,160,69,0.4);
+    color: var(--accent);
+  }
+
+  .arch-node.blue {
+    background: rgba(74,158,255,0.08);
+    border-color: rgba(74,158,255,0.3);
+    color: var(--accent2);
+  }
+
+  .arch-arrow {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+    color: var(--dim);
+    font-size: 1.2rem;
+  }
+
+  .arch-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  /* Decision list */
+  .decision-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+  }
+
+  .decision-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
+    align-items: start;
+    transition: background 0.2s;
+  }
+
+  .decision-item:hover { background: var(--surface2); }
+
+  .decision-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+
+  .decision-text {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .decision-text strong { color: var(--text); font-weight: 500; }
+
+  /* Stack pills */
+  .stack-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .stack-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 6px 14px;
+    background: var(--dim);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .stack-pill:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Back/next nav */
+  .platform-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .platform-nav a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: color 0.2s;
+  }
+  .platform-nav a:hover { color: var(--accent); }
+
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    .content { padding: 0 24px 60px; }
+    .metrics-row { flex-direction: column; }
+    .two-col { grid-template-columns: 1fr; }
+    .decision-item { grid-template-columns: 1fr; gap: 8px; }
+    .platform-nav { padding: 24px; }
+    .arch-layer { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero-grid-bg"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">BM</a>
+  <a href="index.html#platforms" class="nav-back">← All Platforms</a>
+</nav>
+
+<div class="hero">
+  <div class="platform-tag">Data Infrastructure · Agentic Access Layer</div>
+  <h1>MCP Layer<br>on <em>BigQuery</em></h1>
+  <p class="hero-summary">
+    Built an <strong>agent-native data access layer</strong> on top of the enterprise data lake — enabling both engineers and AI agents to query live production data directly through a standardized Model Context Protocol interface. Built before most enterprises knew MCP existed.
+  </p>
+
+  <div class="metrics-row">
+    <div class="metric">
+      <div class="metric-num">10PB+</div>
+      <div class="metric-label">Data Lake Scale</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">300+</div>
+      <div class="metric-label">Global Venues</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">2-in-1</div>
+      <div class="metric-label">Human + Agent Access</div>
+    </div>
+    <div class="metric">
+      <div class="metric-num">Real-Time</div>
+      <div class="metric-label">Live Production Data</div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- THE PROBLEM -->
+  <div class="section">
+    <div class="section-label">The Problem</div>
+    <h2>Data was rich. Access was brittle.</h2>
+    <p>
+      The enterprise had invested years building a <strong>10PB+ multi-cloud data lake</strong> — real-time telemetry, network analytics, operational intelligence across 300+ global venues. The data was there. The problem was access.
+    </p>
+    <p>
+      Engineers had to write SQL. Business users couldn't query at all. And as AI agents were deployed across the organization, they had no standardized way to reach live production data — every integration was bespoke, fragile, and required engineering cycles to maintain.
+    </p>
+    <p>
+      The broader AI transformation was blocked by a fundamental architectural gap: <strong>agents couldn't talk to data without custom plumbing for every use case.</strong>
+    </p>
+  </div>
+
+  <!-- THE APPROACH -->
+  <div class="section">
+    <div class="section-label">The Approach</div>
+    <h2>One interface. Engineers and agents, unified.</h2>
+    <p>
+      The solution was to build a <strong>Model Context Protocol (MCP) layer on top of BigQuery</strong> — a standardized interface that exposes the enterprise data lake to both human engineers and AI agents through the same access pattern.
+    </p>
+    <p>
+      Rather than building separate integration paths for each agent or use case, the MCP layer acts as a <strong>universal data contract</strong>: structured, governed, and queryable by anything that speaks the protocol. This means an agentic ITSM platform, a network self-healing agent, and a human engineer all reach production data through the same interface — with the same governance controls applied consistently.
+    </p>
+
+    <div class="two-col" style="margin-top: 24px;">
+      <div class="info-card">
+        <div class="info-card-label">For Engineers</div>
+        <div class="info-card-title">Natural language → SQL → Results</div>
+        <p>Engineers query the data lake without writing complex SQL from scratch. The MCP layer translates intent into governed queries against live production data.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">For AI Agents</div>
+        <div class="info-card-title">Agents query live data autonomously</div>
+        <p>Autonomous agents deployed across the enterprise — ITSM, network ops, customer care — pull real-time production data directly as part of their decision loops, without human-in-the-loop data retrieval.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div class="section">
+    <div class="section-label">Architecture Pattern</div>
+    <h2>How the layers connect</h2>
+
+    <div class="arch-diagram">
+      <div class="arch-flow">
+
+        <div class="arch-label">Consumers</div>
+        <div class="arch-layer">
+          <div class="arch-node blue">Engineers</div>
+          <div class="arch-node blue">AI Agents</div>
+          <div class="arch-node blue">Agentic Platforms</div>
+        </div>
+
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-label">Access Layer</div>
+        <div class="arch-layer">
+          <div class="arch-node highlight">MCP Interface</div>
+        </div>
+
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-label">Governance & Control</div>
+        <div class="arch-layer">
+          <div class="arch-node">Identity & Access Controls</div>
+          <div class="arch-node">Query Governance</div>
+          <div class="arch-node">Audit Logging</div>
+        </div>
+
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-label">Data Foundation</div>
+        <div class="arch-layer">
+          <div class="arch-node highlight">BigQuery — 10PB+ Data Lake</div>
+        </div>
+
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-label">Source Data</div>
+        <div class="arch-layer">
+          <div class="arch-node">Network Telemetry</div>
+          <div class="arch-node">Operational Data</div>
+          <div class="arch-node">Real-Time Streams</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY DECISIONS -->
+  <div class="section">
+    <div class="section-label">Key Decisions</div>
+    <h2>Why this, why now</h2>
+
+    <div class="decision-list">
+      <div class="decision-item">
+        <div class="decision-tag">Protocol</div>
+        <div class="decision-text"><strong>Standardize on MCP before it was mainstream.</strong> The decision to adopt Model Context Protocol early was about future-proofing — building an access layer that would work with any agent framework, any LLM, as the ecosystem matured. Avoided vendor lock-in at the data access layer.</div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-tag">Governance</div>
+        <div class="decision-text"><strong>Agents get the same governance humans get.</strong> A common mistake in agentic architectures is treating agent data access as a special case with looser controls. Every query — human or agent — passes through the same identity and access management layer. Compliance stays intact.</div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-tag">Foundation</div>
+        <div class="decision-text"><strong>BigQuery as the single source of truth.</strong> After migrating the full data lake from Snowflake to GCP BigQuery, building the MCP layer on BigQuery made the access interface stable and consistent — agents always reach the same governed, production-grade data foundation.</div>
+      </div>
+      <div class="decision-item">
+        <div class="decision-tag">Design</div>
+        <div class="decision-text"><strong>Reusable pattern, not a one-off integration.</strong> Built the MCP layer as a reusable platform component — any new agent deployed across the enterprise inherits data access on day one, without custom engineering per use case.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="section">
+    <div class="section-label">Impact</div>
+    <h2>What it unlocked</h2>
+    <div class="two-col">
+      <div class="info-card">
+        <div class="info-card-label">Operational</div>
+        <div class="info-card-title">Agents operate on live data</div>
+        <p>Every autonomous agent deployed across the enterprise — ITSM, network ops, analytics — operates on real-time production data rather than stale snapshots or manual data pulls.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Engineering Velocity</div>
+        <div class="info-card-title">Zero custom integration per agent</div>
+        <p>New agents inherit data access through the MCP interface. Eliminated the engineering overhead of building bespoke data integrations for every new AI use case.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Governance</div>
+        <div class="info-card-title">Consistent controls at scale</div>
+        <p>Unified access governance across human and machine consumers. Audit trail covers every query regardless of whether a person or agent made it.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Strategic</div>
+        <div class="info-card-title">Foundation for future agents</div>
+        <p>The MCP layer is the data infrastructure that makes the agentic enterprise possible. Every future agent deployment is faster because this foundation exists.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STACK -->
+  <div class="section">
+    <div class="section-label">Technology</div>
+    <h2>Stack</h2>
+    <div class="stack-row">
+      <span class="stack-pill">Model Context Protocol (MCP)</span>
+      <span class="stack-pill">Google BigQuery</span>
+      <span class="stack-pill">GCP</span>
+      <span class="stack-pill">Identity & Access Management</span>
+      <span class="stack-pill">AI Agents</span>
+      <span class="stack-pill">Agentic Orchestration</span>
+      <span class="stack-pill">Data Governance</span>
+      <span class="stack-pill">Audit Logging</span>
+      <span class="stack-pill">Real-Time Analytics</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="platform-nav">
+  <a href="index.html#platforms">← Back to All Platforms</a>
+  <a href="platform-snowflake-bq.html">Next: Snowflake → BigQuery Migration →</a>
+</div>
+
+<footer>
+  <div class="footer-copy">© 2026 Bill Marino</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
