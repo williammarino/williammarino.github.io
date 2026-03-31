@@ -293,6 +293,8 @@
     position: relative;
     overflow: hidden;
     cursor: default;
+    display: flex;
+    flex-direction: column;
   }
 
   .platform-card::before {
@@ -342,6 +344,7 @@
     font-size: 0.9rem;
     line-height: 1.7;
     margin-bottom: 24px;
+    flex: 1;
   }
 
   .platform-metric {
@@ -350,6 +353,7 @@
     color: var(--accent);
     padding: 8px 0;
     border-top: 1px solid var(--border);
+    margin-top: auto;
   }
 
   .platform-stack {
@@ -827,6 +831,103 @@
     color: var(--dim);
   }
 
+  /* CAREER PROGRESSION */
+  .progression-inner {
+    margin-bottom: 20px;
+  }
+
+  .progression-track {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    padding: 0;
+  }
+
+  .progression-track::before {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border);
+    z-index: 0;
+  }
+
+  .prog-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .prog-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    height: 16px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .prog-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dim);
+    border: 1px solid var(--muted);
+    flex-shrink: 0;
+  }
+
+  .prog-dot--current {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(232,160,69,0.5);
+    width: 13px;
+    height: 13px;
+  }
+
+  .prog-role {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.4;
+    text-align: center;
+    padding: 8px 6px 0;
+  }
+
+  .prog-item--current .prog-role {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .prog-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 0.08em;
+    margin: 0;
+    padding: 12px 24px;
+    border: 1px solid rgba(232,160,69,0.35);
+    background: rgba(232,160,69,0.07);
+    display: inline-block;
+  }
+
+  .prog-note-wrap {
+    text-align: center;
+    margin-top: 24px;
+  }
+
+  .prog-note span {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
   /* ANIMATIONS */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(24px); }
@@ -842,20 +943,28 @@
   @media (max-width: 768px) {
     nav { padding: 16px 24px; }
     .nav-links { display: none; }
-    .hero { padding: 100px 24px 60px; }
-    .stats-bar { padding: 24px; grid-template-columns: repeat(2, 1fr); }
-    section { padding: 60px 24px; }
+    .hero { padding: 100px 20px 48px; }
+    .stats-bar { padding: 20px; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    section { padding: 48px 20px; }
     .platforms-grid { grid-template-columns: 1fr; }
     .impact-grid { grid-template-columns: 1fr; }
     .impact-card.featured { grid-column: 1; }
     .leadership-grid { grid-template-columns: 1fr; }
     .recognition-list { grid-template-columns: 1fr; }
-    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    .about-grid { grid-template-columns: 1fr; gap: 32px; }
     .about-left { position: static; }
+    .about-stats { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .stack-groups { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .progression-track { overflow-x: auto; }
+    .prog-item { min-width: 80px; }
     footer { flex-direction: column; gap: 12px; text-align: center; }
-    .contact-section { padding: 60px 24px; }
+    .contact-section { padding: 48px 20px; }
+    .contact-inner { padding: 0; }
     .form-row { grid-template-columns: 1fr; }
-    .footer-resumes { justify-content: center; }
+    .contact-exploring-roles { font-size: 1rem; }
+    .impact-num { font-size: 2.5rem; }
+    .section-title { font-size: 1.8rem; }
   }
 </style>
 </head>
@@ -865,6 +974,7 @@
 <nav>
   <div class="nav-logo">BM</div>
   <ul class="nav-links">
+    <li><a href="#progression">Career</a></li>
     <li><a href="#platforms">Platforms</a></li>
     <li><a href="#impact">Impact</a></li>
     <li><a href="#leadership">Leadership</a></li>
@@ -918,6 +1028,58 @@
   </div>
 </div>
 
+<!-- CAREER PROGRESSION -->
+<div id="progression" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+<section style="padding: 60px 48px; max-width: 1200px; margin: 0 auto;">
+  <div class="section-header fade-in">
+    <span class="section-num" style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent);letter-spacing:0.2em;">13 Years</span>
+    <h2 class="section-title" style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;">One Company. One Direction.</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="progression-inner fade-in">
+    <div class="progression-track">
+      <div class="prog-item">
+        <div class="prog-year">2012</div>
+        <div class="prog-dot"></div>
+        <div class="prog-role">Data Engineer</div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-year"></div>
+        <div class="prog-dot"></div>
+        <div class="prog-role">Senior Data Engineer</div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-year"></div>
+        <div class="prog-dot"></div>
+        <div class="prog-role">Principal Data Engineer</div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-year"></div>
+        <div class="prog-dot"></div>
+        <div class="prog-role">Director, Data Engineering</div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-year"></div>
+        <div class="prog-dot"></div>
+        <div class="prog-role">Sr. Director, Data Engineering</div>
+      </div>
+      <div class="prog-item prog-item--current">
+        <div class="prog-year">Present</div>
+        <div class="prog-dot prog-dot--current"></div>
+        <div class="prog-role">VP of Engineering, AI, Data &amp; Enterprise Technology</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prog-note-wrap fade-in">
+    <p class="prog-note">
+      <span>Currently at Boingo Wireless</span> · Actively exploring VP / EVP AI and Data leadership roles
+    </p>
+  </div>
+</section>
+</div>
+
 <!-- PLATFORMS -->
 <div id="platforms">
 <section>
@@ -948,7 +1110,7 @@
       <div class="platform-tag">Autonomous Operations</div>
       <div class="platform-name">Self-Healing Network</div>
       <p class="platform-desc">Deployed autonomous AI agents into the network fabric to detect, diagnose, and remediate faults in real time — enabling the network to self-heal without human intervention across 300+ global venues.</p>
-      <div class="platform-metric">▸ Eliminated reactive ops cycles · 300+ venues</div>
+      <div class="platform-metric">▸ Eliminated reactive ops cycles across 300+ venues</div>
       <div class="platform-stack">
         <span class="stack-tag">AI Agents</span>
         <span class="stack-tag">SDN</span>
@@ -962,7 +1124,7 @@
       <div class="platform-tag">Enterprise AI Platform</div>
       <div class="platform-name">Agentic ITSM Platform</div>
       <p class="platform-desc">Built an agentic ITSM platform with AI-driven incident triage, intelligent routing, and autonomous resolution with human-in-the-loop controls — cutting MTTR across 300+ global venues.</p>
-      <div class="platform-metric">▸ Autonomous resolution · Human-in-the-loop controls</div>
+      <div class="platform-metric">▸ Autonomous resolution with human-in-the-loop controls</div>
       <div class="platform-stack">
         <span class="stack-tag">LLM Orchestration</span>
         <span class="stack-tag">Agentic Workflows</span>
@@ -1189,7 +1351,8 @@
       <div class="stack-group-label">AI & Agentic</div>
       <div class="stack-items">
         <div class="stack-item">Claude · Gemini for Enterprise</div>
-        <div class="stack-item">Vertex AI · OpenAI GPT-4</div>
+        <div class="stack-item">Vertex AI · OpenAI GPT-5.4</div>
+        <div class="stack-item">LangChain · OpenLLM</div>
         <div class="stack-item">Agentic Orchestration</div>
         <div class="stack-item">Google Agentspace · ADK</div>
         <div class="stack-item">AI Coding Assistants</div>
@@ -1252,6 +1415,7 @@
       <div class="recognition-text">
         <strong>Co-Author, "AI in Wi-Fi" — Wireless Broadband Alliance</strong>
         Defined AI's role in next-gen Wi-Fi performance and reliability for the global industry framework.
+        <a href="https://wballiance.com/ai-ml-for-wi-fi-report/" target="_blank" style="display:inline-block; margin-top:6px; font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--accent2); text-decoration:none; letter-spacing:0.1em;">↗ Read the Report</a>
       </div>
     </div>
     <div class="recognition-item fade-in">
@@ -1272,7 +1436,8 @@
       <div class="recognition-bullet">◉</div>
       <div class="recognition-text">
         <strong>Published Case Study — Snowflake & Boingo Wireless</strong>
-        Enterprise data cloud unifying network telemetry, analytics, and operational insights. Featured on snowflake.com.
+        Enterprise data cloud unifying network telemetry, analytics, and operational insights.
+        <a href="https://www.snowflake.com/en/customers/all-customers/case-study/boingo/" target="_blank" style="display:inline-block; margin-top:6px; font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--accent2); text-decoration:none; letter-spacing:0.1em;">↗ Read on snowflake.com</a>
       </div>
     </div>
     <div class="recognition-item fade-in">
@@ -1319,7 +1484,7 @@
         </div>
         <div class="about-stat">
           <div class="about-stat-num">50+</div>
-          <div class="about-stat-label">Automations</div>
+          <div class="about-stat-label">Team Size</div>
         </div>
         <div class="about-stat">
           <div class="about-stat-num">0→1</div>
@@ -1329,13 +1494,9 @@
     </div>
 
     <div class="about-right fade-in">
-      <p>Enterprise AI and data executive with <strong>15+ years building mission-critical data platforms</strong> — and a proven track record leading company-wide AI transformation before most enterprises know where to start.</p>
+      <p>Enterprise AI and data executive with <strong>15+ years building mission-critical platforms</strong>. Built the data lake from scratch on Snowflake, scaled it to 10PB+, then made the call to migrate fully to GCP BigQuery. Led company-wide AI transformation across 350+ people — 50+ production automations, $30M+ in cost savings, $75M+ in enterprise value — before most enterprises knew where to start.</p>
 
-      <p>At Boingo Wireless, I built the data foundation from scratch: brought in <strong>Snowflake to construct the enterprise data lake, scaled it to 10PB+, then led the full migration to GCP BigQuery</strong> as the production intelligence layer powering every AI system across 300+ global venues.</p>
-
-      <p>I'm a <strong>practitioner-executive who leads from the front</strong> — embedding directly with business functions, building to production, and redeploying to the next problem. Finance, HR, network ops, sales — I've deployed AI inside all of them. My AI transformation strategy was adopted across 350+ people, delivering 50+ production automations across 5 business functions.</p>
-
-      <p>Trusted <strong>C-suite and Board partner</strong> for AI strategy, investment alignment, and enterprise transformation. Wharton Executive CTO Program graduate. AWS re:Invent speaker. WBA AI co-author.</p>
+      <p>A <strong>practitioner-executive who leads from the front</strong> — embedding with finance, HR, network ops, and sales to deploy AI that eliminated real work. Trusted C-suite and Board partner for AI strategy and investment. Led a team of 50+. Owned a $28M budget. Wharton Executive CTO Program, 2024. AWS re:Invent speaker. WBA AI co-author.</p>
 
       <div class="about-conviction">
         "Technology should scale the business, not just support it."
