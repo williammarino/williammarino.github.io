@@ -508,6 +508,52 @@
     line-height: 1.7;
   }
 
+  /* DEPT ACCELERATORS */
+  .accel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+  }
+
+  .accel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 36px;
+    transition: background 0.2s;
+  }
+
+  .accel-card:hover { background: var(--surface2); }
+
+  .accel-dept {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .accel-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .accel-item-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .accel-item-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
   /* STACK */
   .stack-section {
     background: var(--surface);
@@ -1012,6 +1058,7 @@
     .about-grid { grid-template-columns: 1fr; gap: 32px; }
     .about-left { position: static; }
     .about-stats { grid-template-columns: repeat(2, 1fr); }
+    .accel-grid { grid-template-columns: 1fr; }
     .two-col { grid-template-columns: 1fr; }
     .stack-groups { grid-template-columns: 1fr 1fr; gap: 24px; }
     .progression-track { overflow-x: auto; }
@@ -1033,6 +1080,7 @@
   <div class="nav-logo">BM</div>
   <ul class="nav-links">
     <li><a href="#progression">Career</a></li>
+    <li><a href="#accelerators">Deployments</a></li>
     <li><a href="#platforms">Platforms</a></li>
     <li><a href="#impact">Impact</a></li>
     <li><a href="#leadership">Leadership</a></li>
@@ -1139,11 +1187,83 @@
 </section>
 </div>
 
+<!-- DEPT ACCELERATORS -->
+<div id="accelerators">
+<section>
+  <div class="section-header fade-in">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Business Unit Deployments</h2>
+    <div class="section-line"></div>
+  </div>
+  <p class="section-subtitle fade-in">Where AI actually landed inside the business.</p>
+
+  <div class="accel-grid fade-in">
+
+    <div class="accel-card">
+      <div class="accel-dept">HR</div>
+      <div class="accel-items">
+        <div class="accel-item">
+          <div class="accel-item-name">Onboarding &amp; Offboarding</div>
+          <div class="accel-item-desc">Automated end-to-end provisioning and de-provisioning workflows — system access, equipment assignment, and account lifecycle managed without manual IT tickets.</div>
+        </div>
+        <div class="accel-item">
+          <div class="accel-item-name">AI-Assisted Candidate Screening</div>
+          <div class="accel-item-desc">AI-powered candidate screening and performance review support — augmenting HR judgment with structured analysis, not replacing it.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accel-card">
+      <div class="accel-dept">Finance</div>
+      <div class="accel-items">
+        <div class="accel-item">
+          <div class="accel-item-name">Month-End Close Automation</div>
+          <div class="accel-item-desc">Automated month-end close workflows — eliminating manual reconciliation cycles and compressing close timelines.</div>
+        </div>
+        <div class="accel-item">
+          <div class="accel-item-name">Board Prep Automation</div>
+          <div class="accel-item-desc">AI-driven board reporting preparation — pulling live data, generating structured summaries, and freeing finance leadership from manual deck assembly.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accel-card">
+      <div class="accel-dept">IT</div>
+      <div class="accel-items">
+        <div class="accel-item">
+          <div class="accel-item-name">Agentic Asset Management</div>
+          <div class="accel-item-desc">Agentic provisioning system tracking corporate assets end-to-end — assignment, lifecycle, and disposition managed autonomously against inventory records.</div>
+        </div>
+        <div class="accel-item">
+          <div class="accel-item-name">Software License Catalog</div>
+          <div class="accel-item-desc">Automated license management and usage tracking integrated with PO systems — eliminating over-provisioning, flagging unused seats, and aligning spend to actual consumption.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accel-card">
+      <div class="accel-dept">Network Ops</div>
+      <div class="accel-items">
+        <div class="accel-item">
+          <div class="accel-item-name">Self-Healing Infrastructure</div>
+          <div class="accel-item-desc">Autonomous AI agents detect, diagnose, and remediate network faults in real time across 300+ global venues — eliminating reactive ops cycles without human intervention.</div>
+        </div>
+        <div class="accel-item">
+          <div class="accel-item-name">Agentic ITSM</div>
+          <div class="accel-item-desc">Multi-agent orchestration handling incident triage, intelligent routing, and autonomous resolution — agents reason across live ticket data, runbooks, and asset records.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+
 <!-- PLATFORMS -->
 <div id="platforms">
 <section>
   <div class="section-header fade-in">
-    <span class="section-num">01</span>
+    <span class="section-num">02</span>
     <h2 class="section-title">Production Platforms</h2>
     <div class="section-line"></div>
   </div>
@@ -1321,7 +1441,7 @@
 <div id="impact" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
 <section>
   <div class="section-header fade-in">
-    <span class="section-num">02</span>
+    <span class="section-num">03</span>
     <h2 class="section-title">Quantified Impact</h2>
     <div class="section-line"></div>
   </div>
@@ -1360,7 +1480,7 @@
 <div id="leadership">
 <section>
   <div class="section-header fade-in">
-    <span class="section-num">03</span>
+    <span class="section-num">04</span>
     <h2 class="section-title">How I Lead</h2>
     <div class="section-line"></div>
   </div>
@@ -1411,7 +1531,7 @@
 <div id="stack" class="stack-section">
 <section>
   <div class="section-header fade-in">
-    <span class="section-num">04</span>
+    <span class="section-num">05</span>
     <h2 class="section-title">Technology Stack</h2>
     <div class="section-line"></div>
   </div>
@@ -1476,7 +1596,7 @@
 <div>
 <section>
   <div class="section-header fade-in">
-    <span class="section-num">05</span>
+    <span class="section-num">06</span>
     <h2 class="section-title">Recognition & Publications</h2>
     <div class="section-line"></div>
   </div>
@@ -1534,7 +1654,7 @@
 <div id="about" style="background: var(--surface); border-top: 1px solid var(--border);">
 <section>
   <div class="section-header fade-in">
-    <span class="section-num">06</span>
+    <span class="section-num">07</span>
     <h2 class="section-title">About</h2>
     <div class="section-line"></div>
   </div>
