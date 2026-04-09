@@ -441,6 +441,39 @@
     transition: background 0.2s;
   }
 
+  .leadership-card--featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
+    border-color: rgba(232,160,69,0.3);
+    padding: 40px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .leadership-card--featured:hover {
+    background: linear-gradient(135deg, #1a2430 0%, var(--surface2) 100%);
+  }
+
+  .leadership-card--featured .leadership-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0;
+    color: var(--accent);
+  }
+
+  .leadership-card--featured .leadership-title {
+    font-size: 1.4rem;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .leadership-card--featured .leadership-desc {
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.75;
+  }
+
   .leadership-card:hover {
     background: var(--surface2);
   }
@@ -1006,7 +1039,7 @@
   <div class="hero-tag">Open to VP of AI &amp; Enterprise Transformation Roles</div>
   <h1>Bill<br><span>Marino</span></h1>
   <p class="hero-subtitle">
-    <strong>VP of AI Transformation &amp; Data.</strong> Enterprise AI and data executive with 15+ years building mission-critical platforms, forward-deployed into business units to ship production AI, not just strategy decks.
+    <strong>VP of AI Transformation &amp; Data.</strong> Enterprise AI and data executive with 15+ years building mission-critical platforms — a force multiplier and player-coach, forward-deployed into business units to ship production AI, not just strategy decks.
   </p>
   <div class="hero-cta">
     <a href="#platforms" class="btn-primary">View My Work</a>
@@ -1321,6 +1354,13 @@
   </div>
 
   <div class="leadership-grid">
+    <div class="leadership-card leadership-card--featured fade-in">
+      <div class="leadership-icon">⚡</div>
+      <div>
+        <div class="leadership-title">Player-Coach & Force Multiplier</div>
+        <p class="leadership-desc">An executive who gets close enough to the work to make better decisions. Close enough to code, architect, and prototype when it matters. Gets hands-on to de-risk high-stakes bets, set the technical standard, and accelerate teams past hard problems. The output isn't a deliverable. It's a team that moves faster, builds with more confidence, and doesn't need to escalate.</p>
+      </div>
+    </div>
     <div class="leadership-card fade-in">
       <div class="leadership-icon">◈</div>
       <div class="leadership-title">AI Strategy & Roadmap</div>
